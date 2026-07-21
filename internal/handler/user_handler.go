@@ -33,22 +33,24 @@ func (h *UserHandler) Create(c *gin.Context) {
   c.JSON(http.StatusCreated, user)
 }
 
-// func (h *UserHandler) Login(c *gin.Context) { 
-//   email := c.PostForm("email")
-//   password := c.PostForm("password")
-//   user, err := h.service.Login(&domain.LoginRequest{
-//     Email: email,
-//     Password: password,
-//   })
+func (h *UserHandler) Login(c *gin.Context) {
+	var req domain.LoginRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
 
-//   if err != nil { 
-//     c.JSON(http.StatusBadRequest, gin.H{ 
-//       "message": err.Error(),
-//     })
-//     return
-//   }
-//   c.JSON(http.StatusAccepted, user)
-// }
+	user, err := h.service.Login(&req, c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}
 
 // func (h *UserHandler) GetUsers(c *gin.Context) { 
 //   users, err := h.service.GetUsers()

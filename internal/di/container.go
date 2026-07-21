@@ -15,6 +15,6 @@ func Register(r *gin.Engine, db *pgxpool.Pool){
   userHandler := handler.NewUserHandler(userService)
 
   r.POST("/sign-up", userHandler.Create)
-  // r.POST("/sign-in", userHandler.Login)
+  r.POST("/sign-in", userHandler.Login)
   // r.GET("/users", userHandler.GetUsers)
 }

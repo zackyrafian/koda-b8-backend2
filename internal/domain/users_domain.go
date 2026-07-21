@@ -18,8 +18,14 @@ type CreateUserRequest struct {
 }
 
 type LoginRequest struct { 
-  Email string `json:"email"`
-  Password string `json:"password"`
+	Email    string `form:"email" binding:"required,email"`
+	Password string `form:"password" binding:"required"`
+}
+
+type LoginResponse struct { 
+  Id int64
+  Email string 
+  CreatedAt time.Time
 }
 
 // type Repository interface { 

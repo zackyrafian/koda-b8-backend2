@@ -26,16 +26,13 @@ func (s *UserService) GetUsers(ctx context.Context) (*[]domain.User, error) {
   return s.repository.FindAll(ctx)
 }
 
-// func (s *UserService) Login(data *domain.LoginRequest) (*domain.User, error) {
-// 	if !utils.IsEmailValid(data.Email) {
-// 		return nil, errors.New("format email tidak valid")
-// 	}
-// 	user, err := s.repository.FindByEmail(data.Email)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if user.Password != data.Password {
-// 		return nil, errors.New("password salah")
-// 	}
-// 	return user, nil
-// }
+func (s *UserService) Login(data *domain.LoginRequest, ctx context.Context) (*domain.User, error) {
+	user, err := s.repository.FindByEmail(data.Email, ctx)
+	if err != nil {
+		return nil, err
+	}
+	if user.Password != data.Password {
+		return nil, errors.New("password salah")
+	}
+	return user, nil
+}

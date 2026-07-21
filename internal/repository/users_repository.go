@@ -2,8 +2,10 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"koda-b8-backend1/internal/domain"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -33,12 +35,18 @@ func (r *UserRepository) FindAll(ctx context.Context) (*[]domain.User, error) {
   return nil, nil
 }
 
-// func (r *UserRepository) FindByEmail(email string) (*domain.User, error) {
-// 	for _, user := range *r.data {
-// 		if user.Email == email {
-// 			return &user, nil
-// 		}
-// 	}
-
-// 	return nil, errors.New("user tidak ditemukan")
-// }
+func (r *UserRepository) FindByEmail(email string, ctx context.Context) (*domain.User, error) {
+	user := &domain.User{}
+	err := r.db.QueryRow(
+	  ctx,`
+			SELECT id, email, password FROM users WHERE email = $1
+		`, email, 
+	).Scan(&user.Id ,&user.Email, &user.Password)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.New("user tidak ditemukan")
+		}
+		return nil, err
+	}
+	return user, err
+}
