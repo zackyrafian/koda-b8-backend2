@@ -59,15 +59,24 @@ func (r *UserRepository) Create(req *domain.CreateUserRequest, ctx context.Conte
     // return &users, nil
 }
 
-// func (r *UserRepository) FindAll(ctx context.Context) (*[]domain.User, error) { 
-//   var users []domain.User
-//   err != r.db.Query(
-//     ctx, `
+func (r *UserRepository) FindAll(ctx context.Context) (*[]domain.User, error) { 
+  var users []domain.User
+  rows, err := r.db.Query(
+    ctx, `
+    SELECT users.id as id, fullname, email FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id
+    `, 
+  )
 
-//     `, 
-//   ).Scan()
-//   return nil, nil
-// }
+  if err != nil { 
+    return &users, nil
+  }
+  for rows.Next() { 
+    var p domain.User
+    err = rows.Scan(&p.Id, &p.FullName, &p.Email)
+    users = append(users, p)
+  }
+  return &users, nil
+}
 
 func (r *UserRepository) FindByEmail(email string, ctx context.Context) (*domain.User, error) {
 	user := &domain.User{}
