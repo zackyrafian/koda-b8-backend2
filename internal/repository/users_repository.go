@@ -19,21 +19,55 @@ func NewUserRepository(db *pgxpool.Pool) *UserRepository {
 }
 
 func (r *UserRepository) Create(req *domain.CreateUserRequest, ctx context.Context) (*domain.User, error) {
-    var users domain.User
-    err := r.db.QueryRow(
-      ctx, `
-        INSERT INTO users (email, password) VALUES ($1, $2) RETURNING users.email, id
-      `, req.Email, req.Password, 
-    ).Scan(&users.Email, &users.Id)
+    tx, err := r.db.Begin(ctx) 
     if err != nil { 
+      return nil, err 
+    }
+    defer tx.Rollback(ctx) 
+    var UserID int64 
+
+    err = tx.QueryRow(
+      ctx, `
+        INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id
+      `, req.Email, req.Password,
+    ).Scan(&UserID)
+
+    _, err = tx.Exec(
+      ctx, `
+        INSERT INTO user_profiles (fullname, user_id) VALUES ($1, $2)
+      `,req.FullName, UserID,
+    )
+
+    if err != nil { 
+      return nil, err 
+    }
+
+    if err := tx.Commit(ctx); err != nil {
       return nil, err
     }
-    return &users, nil
+
+    return nil, err
+    // var users domain.User
+    // err := r.db.QueryRow(
+    //   ctx, `
+    //     INSERT INTO users (email, password) VALUES ($1, $2) RETURNING users.email, id
+    //   `, req.Email, req.Password, 
+    // ).Scan(&users.Email, &users.Id)
+    // if err != nil { 
+    //   return nil, err
+    // }
+    // return &users, nil
 }
 
-func (r *UserRepository) FindAll(ctx context.Context) (*[]domain.User, error) { 
-  return nil, nil
-}
+// func (r *UserRepository) FindAll(ctx context.Context) (*[]domain.User, error) { 
+//   var users []domain.User
+//   err != r.db.Query(
+//     ctx, `
+
+//     `, 
+//   ).Scan()
+//   return nil, nil
+// }
 
 func (r *UserRepository) FindByEmail(email string, ctx context.Context) (*domain.User, error) {
 	user := &domain.User{}
