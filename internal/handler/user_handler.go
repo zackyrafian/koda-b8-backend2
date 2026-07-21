@@ -4,6 +4,7 @@ import (
 	"koda-b8-backend1/internal/domain"
 	"koda-b8-backend1/internal/service"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,9 +36,16 @@ func (h *UserHandler) Create(c *gin.Context) {
 
 func (h *UserHandler) Login(c *gin.Context) {
 	var req domain.LoginRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+	// if err := c.ShouldBind(&req); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{
+	// 		"message": err.Error(),
+	// 	})
+	// 	return
+	// }
+	// 
+	if err := c.ShouldBindJSON(&req); err != nil { 
+	  c.JSON(http.StatusBadRequest, gin.H{ 
+			 "message": err.Error(),
 		})
 		return
 	}
@@ -52,13 +60,53 @@ func (h *UserHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// func (h *UserHandler) GetUsers(c *gin.Context) { 
-//   users, err := h.service.GetUsers()
-//   if err != nil { 
-//     c.JSON(http.StatusInternalServerError, gin.H{ 
-//       "message": "error",
-//     })
-//     return 
-//   }
-//   c.JSON(http.StatusOK, users)
-// }
+func (h *UserHandler) GetUsers(c *gin.Context) { 
+  users, err := h.service.GetUsers(c.Request.Context())
+  if err != nil { 
+    c.JSON(http.StatusInternalServerError, gin.H{ 
+      "message": "error",
+    })
+    return 
+  }
+  c.JSON(http.StatusOK, gin.H { 
+    "results": users,
+  })
+}
+
+func (h *UserHandler) GetUserByID(c *gin.Context) { 
+  id, err := strconv.ParseInt(c.Param("id"), 10, 64) 
+  if err != nil { 
+    c.JSON(http.StatusBadRequest, gin.H{ 
+      "message": "invalid id", 
+    })
+  }
+
+  users, err := h.service.GetUserByID(id, c.Request.Context())
+  if err != nil { 
+    c.JSON(http.StatusNotFound, gin.H{ 
+      "message": err.Error(),
+    })
+    return
+  }
+  c.JSON(http.StatusOK, users)
+}
+
+func (h *UserHandler) DeleteUsers(c *gin.Context) { 
+  id, err := strconv.ParseInt(c.Param("id"), 10, 64) 
+  if err != nil { 
+    c.JSON(http.StatusBadRequest, gin.H{ 
+      "message": "invalid id", 
+    })
+  }
+
+  err = h.service.DeleteUser(id, c.Request.Context())
+  if err != nil { 
+    c.JSON(http.StatusNotFound, gin.H{ 
+      "message": err.Error(),
+    })
+    return
+  }
+  c.JSON(http.StatusOK, gin.H{ 
+    "message": "Berhasil",
+  })
+}
