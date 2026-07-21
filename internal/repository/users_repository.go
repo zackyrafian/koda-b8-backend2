@@ -93,3 +93,19 @@ func (r *UserRepository) FindByEmail(email string, ctx context.Context) (*domain
 	}
 	return user, err
 }
+
+func (r *UserRepository) FindByID(id int64, ctx context.Context) (*domain.User, error) {
+	user := &domain.User{}
+	err := r.db.QueryRow(
+	  ctx,`
+			SELECT id, email FROM users WHERE id = $1
+		`, id, 
+	).Scan(&user.Id ,&user.Email)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.New("user tidak ditemukan")
+		}
+		return nil, err
+	}
+	return user, err
+}
