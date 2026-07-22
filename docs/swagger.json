@@ -1,0 +1,23 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API documentation",
+        "title": "Backend V2",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:9999",
+    "basePath": "/",
+    "paths": {
+        "/auth/sign-up": {
+            "post": {
+                "description": "Register User",
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Show an account",
+                "responses": {}
+            }
+        }
+    }
+}

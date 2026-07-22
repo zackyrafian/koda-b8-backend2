@@ -1,0 +1,16 @@
+basePath: /
+host: localhost:9999
+info:
+  contact: {}
+  description: API documentation
+  title: Backend V2
+  version: "1.0"
+paths:
+  /auth/sign-up:
+    post:
+      description: Register User
+      responses: {}
+      summary: Show an account
+      tags:
+      - Authentication
+swagger: "2.0"
