@@ -4,6 +4,7 @@ import (
 	"koda-b8-backend1/internal/domain"
 	"koda-b8-backend1/internal/service"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -109,4 +110,64 @@ func (h *UserHandler) DeleteUsers(c *gin.Context) {
   c.JSON(http.StatusOK, gin.H{ 
     "message": "Berhasil",
   })
+}
+
+
+func (h *UserHandler) PatchUser(c *gin.Context) { 
+  id, err := strconv.ParseInt(c.Param("id"), 10, 64) 
+  if err != nil { 
+    c.JSON(http.StatusBadRequest, gin.H{ 
+      "message": "invalid id", 
+    })
+  }
+
+  var req domain.PatchUserRequest
+
+  if err := c.ShouldBindJSON(&req); err != nil { 
+    c.JSON(http.StatusBadRequest, gin.H{ 
+      "message": err.Error(),
+    })
+    return
+  }
+  
+  user, err := h.service.Patch(id, &req, c.Request.Context())
+  if err != nil { 
+    c.JSON(http.StatusInternalServerError, gin.H{ 
+      "message": err.Error(), 
+    })
+    return
+  }
+  c.JSON(200, user)
+}
+
+func (h *UserHandler) UploadPictureProfile(c *gin.Context) {
+  id, err := strconv.ParseInt(c.Param("id"), 10, 64) 
+  file, err := c.FormFile("profile_picture")
+  if err != nil {
+    c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    return
+  }
+
+  dst := filepath.Join("uploads/", filepath.Base(file.Filename))
+  c.SaveUploadedFile(file, dst)
+  
+  req := domain.UploadPicturesProfileRequest{
+    Picture: dst,
+  }
+  
+  if err := c.ShouldBind(&req); err != nil { 
+    c.JSON(http.StatusBadRequest, gin.H{ 
+      "message": err.Error(),
+    })
+    return
+  }
+ 
+  user, err := h.service.UploadPictureProfile(id, &req, c.Request.Context())
+  if err != nil { 
+    c.JSON(http.StatusInternalServerError, gin.H{ 
+      "message": err.Error(), 
+    })
+    return
+  }
+  c.JSON(http.StatusOK, user)
 }
