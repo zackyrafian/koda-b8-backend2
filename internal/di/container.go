@@ -17,17 +17,18 @@ func Register(r *gin.Engine, db *pgxpool.Pool){
 
   {
     auth := r.Group("/auth")
-    auth.POST("/sign-up", userHandler.Create)
+    auth.POST("/sign-up", userHandler.Register)
     auth.POST("/sign-in", userHandler.Login)
   }
 
   { 
-    sc := r.Group("/")
-    sc.Use(middleware.AuthMiddleware())
-    sc.GET("/users", userHandler.GetUsers)
-    sc.DELETE("/users/:id", userHandler.DeleteUsers)
-    sc.GET("/users/:id", userHandler.GetUserByID)
-    sc.PATCH("/users/:id", userHandler.PatchUser)
-    sc.PATCH("/users/:id/picture", userHandler.UploadPictureProfile)
+    users := r.Group("/")
+    users.Use(middleware.AuthMiddleware())
+    users.GET("/users", userHandler.GetUsers)
+    users.POST("/users", userHandler.Create)
+    users.DELETE("/users/:id", userHandler.DeleteUsers)
+    users.GET("/users/:id", userHandler.GetUserByID)
+    users.PATCH("/users/:id", userHandler.PatchUser)
+    users.PATCH("/users/:id/picture", userHandler.UploadPictureProfile)
   }
 }
