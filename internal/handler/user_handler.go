@@ -85,15 +85,15 @@ func (h *UserHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, token)
 }
 
-// CreateAccount godoc
+// RegisterAccount godoc
 // @Summary Register New User
-// @Description  Register User
+// @Description Register User
 // @Accept json
-// @Param request body domain.CreateUserRequest true "JSON"
 // @Produce json
+// @Param request body domain.CreateUserRequest true "JSON"
 // @Success 201 {object} domain.User
 // @Failure 400 {object} map[string]string
-// @Tags  auth
+// @Tags auth
 // @Router /auth/sign-up [post]
 func (h *UserHandler) Register(c *gin.Context) { 
   var form domain.CreateUserRequest
@@ -113,21 +113,26 @@ func (h *UserHandler) Register(c *gin.Context) {
 }
 
 // GetAllUsers godoc
-// @Summary GetAllUsers
-// @Description  Get User
+// @Summary Get All Users
+// @Description Get list of users with pagination and search
 // @Accept json
-// @Param request true "LoginJSON"
 // @Produce json
-// @Success 201 {object} domain.User
-// @Failure 400 {object} map[string]string
-// @Security		BearerAuth
-// @Tags  users
+// @Param page query int false "Page number"
+// @Param limit query int false "Items per page"
+// @Param search query string false "Search keyword"
+// @Param sort query string false "Sort field"
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Tags users
 // @Router /users [get]
 func (h *UserHandler) GetUsers(c *gin.Context) {
   page, err := strconv.ParseInt(c.Query("page"), 10, 64)
   limit, err := strconv.ParseInt(c.Query("limit"), 10, 64)
   search := c.QueryMap("search")
-  users, err := h.service.GetUsers(c.Request.Context(), search, (page), limit)
+  sort := c.QueryMap("sort")
+
+  users, err := h.service.GetUsers(c.Request.Context(), search, page, limit, sort)
   if err != nil { 
     c.JSON(http.StatusInternalServerError, gin.H{ 
       "message": "error",
@@ -140,13 +145,16 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 }
 
 // FindById godoc
-// @Summary Find By id user
+// @Summary Find User By ID
+// @Description Get a single user by ID
 // @Accept json
 // @Produce json
-// @Success 201 {object} domain.User
+// @Param id path int true "User ID"
+// @Success 200 {object} domain.User
 // @Failure 400 {object} map[string]string
-// @Security		BearerAuth
-// @Tags  users
+// @Failure 404 {object} map[string]string
+// @Security BearerAuth
+// @Tags users
 // @Router /users/{id} [get]
 func (h *UserHandler) GetUserByID(c *gin.Context) { 
   id, err := strconv.ParseInt(c.Param("id"), 10, 64) 
@@ -168,13 +176,15 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 
 // DeleteUser godoc
 // @Summary Delete User
+// @Description Delete user by ID
 // @Accept json
-// @Param request body domain.PatchUserRequest true "PatchUser"
 // @Produce json
-// @Success 201 {object} domain.User
+// @Param id path int true "User ID"
+// @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
-// @Security		BearerAuth
-// @Tags  users
+// @Failure 404 {object} map[string]string
+// @Security BearerAuth
+// @Tags users
 // @Router /users/{id} [delete]
 func (h *UserHandler) DeleteUsers(c *gin.Context) { 
   id, err := strconv.ParseInt(c.Param("id"), 10, 64) 
@@ -196,15 +206,18 @@ func (h *UserHandler) DeleteUsers(c *gin.Context) {
   })
 }
 
-// EditUsers godoc
+// EditUser godoc
 // @Summary Edit User
+// @Description Update user data by ID
 // @Accept json
-// @Param request body domain.PatchUserRequest true "PatchUser"
 // @Produce json
-// @Success 201 {object} domain.User
+// @Param id path int true "User ID"
+// @Param request body domain.PatchUserRequest true "PatchUser"
+// @Success 200 {object} domain.User
 // @Failure 400 {object} map[string]string
-// @Security		BearerAuth
-// @Tags  users
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Tags users
 // @Router /users/{id} [patch]
 func (h *UserHandler) PatchUser(c *gin.Context) { 
   id, err := strconv.ParseInt(c.Param("id"), 10, 64) 
@@ -234,14 +247,17 @@ func (h *UserHandler) PatchUser(c *gin.Context) {
 }
 
 // UploadPictureUser godoc
-// @Summary Upload Picture User
-// @Accept json
-// @Param request body domain.PatchUserRequest true "PatchUser"
+// @Summary Upload Profile Picture
+// @Description Upload profile picture for a user
+// @Accept multipart/form-data
 // @Produce json
-// @Success 201 {object} domain.User
+// @Param id path int true "User ID"
+// @Param profile_picture formData file true "Profile picture file"
+// @Success 200 {object} domain.User
 // @Failure 400 {object} map[string]string
-// @Security		BearerAuth
-// @Tags  users
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Tags users
 // @Router /users/{id}/picture [patch]
 func (h *UserHandler) UploadPictureProfile(c *gin.Context) {
   id, err := strconv.ParseInt(c.Param("id"), 10, 64) 
