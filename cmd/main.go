@@ -20,6 +20,11 @@ import (
 // @description API documentation
 // @host localhost:9999
 // @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description *IMPORTANT Insert "Bearer" before token, exp: Bearer eyJh...
+
 
 func main () {
   r := gin.Default()
