@@ -23,8 +23,8 @@ func (s *UserService) Create(data *domain.CreateUserRequest, ctx context.Context
     return s.repository.Create(data, ctx)
 }
 
-func (s *UserService) GetUsers(ctx context.Context) (*[]domain.User, error) { 
-  return s.repository.FindAll(ctx)
+func (s *UserService) GetUsers(ctx context.Context, q map[string]string,page int64,limit int64, sort map[string]string) (*[]domain.User, error) { 
+  return s.repository.FindAll(ctx, q, page, limit, sort)
 }
 
 func (s *UserService) GetUserByID(id int64, ctx context.Context) (*domain.User, error) { 
@@ -61,9 +61,9 @@ func (s *UserService) Patch(id int64, req *domain.PatchUserRequest, ctx context.
 }
 
 func (s *UserService) UploadPictureProfile(id int64, req *domain.UploadPicturesProfileRequest, ctx context.Context) (*domain.User, error) {
-  _, err := s.repository.FindByID(id, ctx)
+  user, err := s.repository.FindByID(id, ctx)
   if err != nil {
     return nil, err
   }
-  return s.repository.UploadPictureProfile(id, req, ctx)
+  return s.repository.UploadPictureProfile(user.Id, req, ctx)
 }
