@@ -5,14 +5,17 @@ import (
 )
 
 type User struct { 
-  Id int64
-  Email string 
-  Password string 
-  CreatedAt time.Time
+  Id int64 `json:"id"`
+  Email string `json:"email"`
+  FullName string `json:"fullname"`
+  Picture *string `json:"picture"`
+  Password string `json:"-"`
+  CreatedAt time.Time `json:"created_at"`
 }
 
 type CreateUserRequest struct { 
-  Id int64 `json:"id"`
+  // Id int64 `json:"id"`
+  FullName string `json:"fullname"`
   Email string `json:"email"`
   Password string `json:"password"`
 }
@@ -22,13 +25,24 @@ type LoginRequest struct {
 	Password string `form:"password" binding:"required"`
 }
 
+type UserFilter struct { 
+  email string 
+  name string
+}
+
+type PatchUserRequest struct { 
+  Email *string `json:"email"`                                              
+  FullName *string `json:"fullname"` 
+}
+
+type UploadPicturesProfileRequest struct {
+  Picture string `json:"picture"`
+}
+
 type LoginResponse struct { 
   Id int64
   Email string 
   CreatedAt time.Time
 }
 
-// type Repository interface { 
-//   Create(ctx context.Context ,req *CreateUserRequest) (*User, error) 
-//   FindByEmail(ctx context.Context, req *LoginRequest) (*User, error)
-// }
+
